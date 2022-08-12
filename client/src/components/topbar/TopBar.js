@@ -1,5 +1,4 @@
 import './topbar.css'
-
 function TopBar(props) {
     return (
         <div className='top'>
