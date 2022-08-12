@@ -1,22 +1,21 @@
-import React from 'react';
-import './login.css'
-function Login() {
+import './register.css'
+function Register() {
     return (
-        <div className="login">
-            <span className="loginTitle">
+        <div className="register">
+            <span className="registerTitle">
                 Login
             </span>
-            <form className="loginForm">
+            <form className="registerForm">
                 <label>Email</label>
-                <input className='loginInput' type="text" placeholder="Enter your Email..."/>
+                <input className='registerInput' type="text" placeholder="Enter your Email..."/>
 
                 <label>Password</label>
-                <input className='loginInput' type="Password" placeholder="Enter your password..."/>
-                <button className="loginButton" >Login</button>
+                <input className='registerInput' type="Password" placeholder="Enter your password..."/>
+                <button className="registerButton" >Login</button>
             </form>
-            <button className="loginRegisterButton" >Register</button>
+            <button className="registerLoginButton" >Register</button>
                    </div>
     );
 }
 
-export default Login; 
+export default Register;
