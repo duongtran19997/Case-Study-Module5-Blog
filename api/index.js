@@ -1,15 +1,15 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv").config();
-const cors = require("cors");
+
+app.use(cors());
 const authRouter = require("./routes/auth");
 const usersRouter = require("./routes/users");
 const postsRouter = require("./routes/posts");
 const categoriesRouter = require("./routes/categories");
 const multer = require("multer");
-const path = require("path");
-app.use(cors()) //call api from localhost
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -20,18 +20,17 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({storage});
+const upload = multer({ storage });
+
+//use static files
+app.use("/images", express.static("images"))
 
 //Route only for upload file (image in this case)
 app.post("/api/upload", upload.single("file"), (req, res) => {
-  console.log(req.body);
   return res.status(200).json("File has been uploaded!");
-})
-
+});
 
 const PORT = process.env.PORT || 5000;
-
-app.use("/images",express.static(path.join(__dirname,'/images')))
 
 const connectDb = async () => {
   try {
@@ -46,6 +45,7 @@ const connectDb = async () => {
     process.exit(1); // restart if error
   }
 };
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

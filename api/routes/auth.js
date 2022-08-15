@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const saltRounds = 10;
 // REGISTER
@@ -30,9 +31,21 @@ router.post("/login", async (req, res) => {
 
     const validate = await bcrypt.compare(req.body.password, user.password);
     if (!validate) return res.status(400).json({ message: "Wrong password!" });
-    const {password, ...userInfo} = user["_doc"]; // data in -_doc
+    const { password, ...userInfo } = user["_doc"]; // data in -_doc
 
-    return res.status(200).json(userInfo);
+    // create jwt
+    const accessToken = jwt.sign(
+      {
+        userId: user._id,
+        isAdmin: user.isAdmin,
+        isActive: user.isActive,
+      },
+      process.env.ACCESS_TOKEN_SECRET || "secret",
+      { expiresIn: "3d" }
+    );
+
+// send userInfo and accessToken
+    return res.status(200).json({ userInfo, accessToken });
   } catch (error) {
     return res.status(500).json(error);
   }

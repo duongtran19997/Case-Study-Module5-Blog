@@ -1,57 +1,35 @@
-import './home.css'
+import React from "react";
+import "./home.css";
 import Header from "../../components/header/Header";
 import Sidebar from "../../components/sizebar/Sidebar";
 import Posts from "../../components/posts/Posts";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import {useLocation} from "react-router-dom";
-import ReactPaginate from "react-paginate";
+import { useLocation } from "react-router-dom";
+
 function Home() {
-    const [currentPage,setCurrentPage] = useState(0)
-    const [posts,setPosts] = useState([])
-    const {search} = useLocation();
-    const PER_PAGE = 4;
+  const [posts, setPosts] = useState([]);
+  const { search } = useLocation();
 
-    useEffect(()=>{
-        const fetchData = async()=>{
-            const res = await axios.get('http://localhost:5000/api/posts'+search)
-            setPosts(res.data)
-        }
-        fetchData()
-    },[search])
+  console.log(search);
 
-    function handlePageClick({selected: selectedPage}){
-        console.log('selected page',selectedPage)
-        setCurrentPage(selectedPage)
-    }
-    const offset = currentPage * PER_PAGE
-
-    const currentPageData = posts.slice(offset,offset +PER_PAGE)
-    const pageCount = Math.ceil(posts.length / PER_PAGE)
-    return (
-        <>
-            <Header/>
-            <div className="home">
-               <div className='leftDiv'>
-                   <Posts posts={currentPageData} />
-                   <ReactPaginate
-                       previousLabel="< Previous"
-                       nextLabel="Next >"
-                       pageCount={pageCount}
-                       onPageChange={handlePageClick}
-                       renderOnZeroPageCount={null}
-                       containerClassName={"pagination"}
-                       previousClassName={'pagination_link'}
-                       nextLinkClassName={'pagination_link'}
-                       disabledClassName={'pagination_link-disabled'}
-                       activeClassName={'pagination_link-active'}
-                   />
-               </div>
-                <Sidebar/>
-            </div>
-
-        </>
-    )
+  useEffect(() => {
+    const fetchData = async () => {
+      // due to using proxy in packet.json
+      const res = await axios.get("http://localhost:5000/api/posts" + search);
+      setPosts(res.data);
+    };
+    fetchData();
+  }, [search]);
+  return (
+    <>
+      <Header />
+      <div className="home">
+        <Posts posts={search ? posts : posts.slice(1)} />
+        <Sidebar />
+      </div>
+    </>
+  );
 }
 
-export default Home
+export default Home;

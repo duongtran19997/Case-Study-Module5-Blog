@@ -2,13 +2,13 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const Post = require("../models/Post");
+const fs = require("fs");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
 // CREATE NEW POST
 router.post("/", async (req, res) => {
   const newPost = new Post(req.body);
-  console.log(req.body);
   try {
     const saevdPost = await newPost.save();
 
@@ -21,6 +21,8 @@ router.post("/", async (req, res) => {
 // UPDATE
 router.put("/:id", async (req, res) => {
   // only you can update your post
+  const { oldPhoto, photo } = req.body;
+
   try {
     const post = await Post.findById(req.params.id);
     if (post?.username === req.body.username) {
@@ -32,6 +34,14 @@ router.put("/:id", async (req, res) => {
           },
           { new: true }
         );
+        // Delete old photo
+        if (oldPhoto !== photo) {
+          try {
+            fs.unlinkSync(`./images/${oldPhoto}`);
+          } catch (error) {
+            console.log(error);
+          }
+        }
         return res.status(200).json("Update successfully!");
       } catch (error) {
         return res.status(500).json(error);
@@ -48,9 +58,7 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   // only you can delete your post
   try {
-
     const post = await Post.findById(req.params.id);
-    console.log(req.body.username);
     if (post?.username === req.body.username) {
       try {
         const deletedPost = await Post.findByIdAndDelete(req.params.id);
@@ -78,7 +86,7 @@ router.get("/:id", async (req, res) => {
 
 //GET ALL POST
 router.get("/", async (req, res) => {
-  const { user: username, cat: catName } = await req.query;
+  const { user: username, cat: catName, search } = req.query;
   try {
     let posts = [];
     if (username && catName) {
@@ -96,8 +104,15 @@ router.get("/", async (req, res) => {
           $in: [catName],
         },
       });
+    } else if (search) {
+      posts = await Post.find({
+        title: {
+          $regex: search,
+          $options: "igm",
+        },
+      });
     } else {
-      posts = await Post.find();
+      posts = await Post.find().sort({ createdAt: -1 });
     }
     return res.status(200).json(posts);
   } catch (error) {

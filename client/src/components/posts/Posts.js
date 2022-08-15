@@ -1,13 +1,14 @@
-import './posts.css'
+import "./posts.css";
 import Post from "../post/Post";
-function Posts({posts}){
-    return(
-        <div className="posts">
-            {posts.map((post,index )=>(
-                <Post post={post}  key={index}/>
-            ))}
-
-        </div>
-    )
+import React from "react";
+function Posts({ posts }) {
+  console.log(posts);
+  return (
+    <div className="posts">
+      {posts.length ? posts?.map((post) => (
+        <Post key={post._id} post={post} />
+      )) : <p className="noPostFound">No post found!</p>}
+    </div>
+  );
 }
-export default Posts
+export default Posts;
