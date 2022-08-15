@@ -12,7 +12,6 @@ import {
 import Login from "./pages/login/Login";
 import Register from "./pages/register/Register";
 import Settings from "./pages/settings/Settings";
-import SinglePost from "./components/singlePost/SinglePost";
 import Single from "./pages/single/Single";
 import { Context } from "./context/Context";
 import AlertDialogSlide from "./components/dialog/AlertDialogSlide";
