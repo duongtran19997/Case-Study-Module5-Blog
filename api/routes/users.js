@@ -8,6 +8,7 @@ const saltRounds = 10;
 // UPDATE
 router.put("/:id", async (req, res) => {
   if (req.body.userId === req.params.id) {
+    console.log(req.body)
     try {
       if (req.body.password) {
         req.body.password = await bcrypt.hash(req.body.password, saltRounds);
@@ -42,7 +43,6 @@ router.delete("/:id", async (req, res) => {
           username: user.username,
         });
 
-        console.log(deletedPost.deletedCount);
 
         const deletedUser = await User.findByIdAndDelete(req.params.id);
         return res
@@ -63,7 +63,6 @@ router.delete("/:id", async (req, res) => {
 
 // GET ONE USER
 router.get("/:id", async (req, res) => {
-  console.log(req.params.id);
   try {
     const user = await User.findById(req.params.id);
     const { password, ...userInfo } = user?.["_doc"];

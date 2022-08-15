@@ -8,6 +8,7 @@ const saltRounds = 10;
 // CREATE NEW POST
 router.post("/", async (req, res) => {
   const newPost = new Post(req.body);
+  console.log(req.body);
   try {
     const saevdPost = await newPost.save();
 
@@ -47,7 +48,9 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   // only you can delete your post
   try {
+
     const post = await Post.findById(req.params.id);
+    console.log(req.body.username);
     if (post?.username === req.body.username) {
       try {
         const deletedPost = await Post.findByIdAndDelete(req.params.id);
@@ -75,7 +78,7 @@ router.get("/:id", async (req, res) => {
 
 //GET ALL POST
 router.get("/", async (req, res) => {
-  const { user: username, cat: catName } = req.query;
+  const { user: username, cat: catName } = await req.query;
   try {
     let posts = [];
     if (username && catName) {

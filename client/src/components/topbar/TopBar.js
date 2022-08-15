@@ -1,5 +1,12 @@
 import './topbar.css'
-function TopBar(props) {
+import {Link} from "react-router-dom";
+import {useContext} from "react";
+import {Context} from "../../context/Context";
+function TopBar() {
+    const {user,dispatch} = useContext(Context);
+    const handleLogout = () =>{
+        dispatch({type: 'LOGOUT'})
+    }
     return (
         <div className='top'>
             <div className="topLeft">
@@ -11,15 +18,27 @@ function TopBar(props) {
 
             <div className="topCenter">
                 <ul className="topList">
-                    <li className="topListItem">Home</li>
-                    <li className="topListItem">Abouts</li>
-                    <li className="topListItem">Contacts</li>
-                    <li className="topListItem">Write</li>
-                    <li className="topListItem">Logout</li>
+                  <Link to='/' className="link"><li className="topListItem">Home</li></Link>
+                  <Link to='/' className="link"> <li className="topListItem">Abouts</li></Link>
+                  <Link to='/' className="link"> <li className="topListItem">Contacts</li></Link>
+                  <Link to='/write' className="link"> <li className="topListItem">Write</li></Link>
+                  <li className="topListItem" onClick={handleLogout}>{user&&"Logout"}</li>
                 </ul>
             </div>
             <div className="topRight">
-                <img className="topImg" src='./img/kimsohuyn.jpg' alt=''/>
+                <ul className="topList">
+                    {user?
+                        <Link to='/settings'>
+                        <img className="topImg" src={user.profilePicture} alt=''/>
+                        </Link>
+
+                        :<>
+                        <Link to="/login" className='link'><li className="topListItem">Login</li></Link>
+                        <Link to="/register" className='link'><li className="topListItem">Register</li></Link>
+                    </>
+                    }
+                </ul>
+
                 <i className="topSearchIcon  fa-solid fa-magnifying-glass-plus"></i>
             </div>
         </div>
