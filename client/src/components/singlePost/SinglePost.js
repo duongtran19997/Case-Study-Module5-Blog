@@ -1,43 +1,162 @@
-import './singlePost.css'
+import axios from "axios";
+import React, { useContext, useEffect, useReducer, useState } from "react";
+import { useLocation } from "react-router";
+import "./singlePost.css";
+import { Link } from "react-router-dom";
+import { Context } from "../../context/Context";
 function SinglePost() {
-    return (
-        <div className="singlePost">
-            <div className="singlePostWrapper">
-                <img src="./img/girl4.jpg" alt="" className="singlePostImg"/>
-                <h1 className="singlePostTitle">Lorem ipsum dolor sit amet
-                <div className="singlePostEdit">
-                    <i className="singlePostIcon fa-solid fa-pen-to-square"></i>
-                    <i className="singlePostIcon fa-solid fa-trash-can"></i>
-                </div>
+  const location = useLocation();
+  const path = location.pathname.split("/")[2];
+  const [post, setPost] = useState();
+  const PF = "http://localhost:5000/images/";
+  const { user } = useContext(Context);
+  const [title, setTitle] = useState("");
+  const [desc, setDesc] = useState("");
+  const [file, setFile] = useState(null);
+  const [updateMode, setUpdateMode] = useState(false);
 
-                </h1>
-                <div className="singlePostInfo">
-                    <span className="singlePostAuthor">Author:<b> Nobia-kun</b></span>
-                    <span className="singlePostDate">1 hour ago</span>
-                </div>
-                <p className="singlePostDesc">Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip,Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip,Lorem ipsum dolor sit amet, consectetur adip ,Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip
-                    ,Lorem ipsum dolor sit amet, consectetur adip,Lorem ipsum dolor sit amet, consectetur adip
-                </p>
+  useEffect(() => {
+    setFile(null)
+    const getPost = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/posts/${path}`);
+        setPost(res.data);
+        setTitle(res.data.title);
+        setDesc(res.data.desc);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    getPost();
+  }, [path]);
+
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`http://localhost:5000/api/posts/${path}`, {
+        data: { username: user.username },
+      });
+      window.location.replace("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleUpdate = async () => {
+    try {
+      let filename = "";
+      if (file) {
+        const data = new FormData();
+        filename = "" + Date.now() + file?.["name"];
+        data.append("name", filename);
+        data.append("file", file);
+        // Upload photo data and handle with multer
+        try {
+          await axios.post(`http://localhost:5000/api/upload`, data);
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      console.log(user);
+
+      await axios.put(`http://localhost:5000/api/posts/${post._id}`, {
+        username: user.username,
+        oldPhoto: post?.["photo"],
+        title,
+        desc,
+        photo: filename ||  post?.["photo"],
+      });
+      setUpdateMode(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  return (
+    <div className="singlePost">
+      {post && (
+        <div className="singlePostWrapper">
+          {file ? (
+            <img
+              className="singlePostImg"
+              src={URL.createObjectURL(file)}
+              alt=""
+            />
+          ) : (
+            <img src={PF + post?.["photo"]} alt="" className="singlePostImg" />
+          )}
+
+          {updateMode && <div></div>}
+
+          {updateMode ? (
+            <div className="writeFormGroup">
+              <label htmlFor="fileInput">
+                <i className="writeIcon fa-solid fa-plus"></i>
+              </label>
+              <input
+                type="file"
+                id="fileInput"
+                accept="image/*"
+                style={{ display: "none" }}
+                //@ts-ignore
+                onChange={(e) => setFile(e.target.files[0])}
+              />
+              <input
+                type="text"
+                value={title}
+                className="singlePostTitleInput"
+                autoFocus
+                onChange={(e) => setTitle(e.target.value)}
+              />
             </div>
+          ) : (
+            <h1 className="singlePostTitle">
+              {post?.["title"]}
+
+              {post?.["username"] === user?.["username"] && (
+                <div className="singlePostEdit">
+                  <i
+                    className="singlePostIcon fa-solid fa-pen-to-square"
+                    onClick={setUpdateMode.bind(this, true)}
+                  />
+                  <i
+                    className="singlePostIcon fa-solid fa-trash-can"
+                    onClick={handleDelete}
+                  />
+                </div>
+              )}
+            </h1>
+          )}
+          <div className="singlePostInfo">
+            <span className="singlePostAuthor">
+              Author:
+              <Link to={`/?user=${post?.["username"]}`} className="link">
+                <b> {post?.["username"]}</b>
+              </Link>
+            </span>
+            <span className="singlePostDate">
+              {" "}
+              {new Date(post?.["createdAt"])?.toDateString()}
+            </span>
+          </div>
+          {updateMode ? (
+            <textarea
+              value={desc}
+              className="singlePostDescInput"
+              onChange={(e) => setDesc(e.target.value)}
+            />
+          ) : (
+            <p className="singlePostDesc">{post?.["desc"]}</p>
+          )}
         </div>
-    );
+      )}
+      {updateMode && (
+        <button className="singlePostButton" onClick={handleUpdate}>
+          Update
+        </button>
+      )}
+    </div>
+  );
 }
 
 export default SinglePost;

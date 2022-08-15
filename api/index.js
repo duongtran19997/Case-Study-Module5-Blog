@@ -1,8 +1,10 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv").config();
 
+app.use(cors());
 const authRouter = require("./routes/auth");
 const usersRouter = require("./routes/users");
 const postsRouter = require("./routes/posts");
@@ -18,13 +20,15 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({storage});
+const upload = multer({ storage });
+
+//use static files
+app.use("/images", express.static("images"))
 
 //Route only for upload file (image in this case)
 app.post("/api/upload", upload.single("file"), (req, res) => {
-  return res.status(200).json("File has been uploaded!")
-})
-
+  return res.status(200).json("File has been uploaded!");
+});
 
 const PORT = process.env.PORT || 5000;
 

@@ -14,6 +14,7 @@ const PostSchema = new mongoose.Schema(
     photo: {
       type: String,
       required: false,
+      default: "default-cover.jpeg",
     },
 
     username: {
