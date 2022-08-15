@@ -1,29 +1,35 @@
-import './home.css'
+import React from "react";
+import "./home.css";
 import Header from "../../components/header/Header";
 import Sidebar from "../../components/sizebar/Sidebar";
 import Posts from "../../components/posts/Posts";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
 
 function Home() {
-    const [posts,setPosts] = useState([])
-    useEffect(()=>{
-        const fetchData = async()=>{
-            const res = await axios.get('https://newsapi.org/v2/everything?q=tesla&from=2022-07-12&sortBy=publishedAt&apiKey=1acef2dd8efb4e57ae67f5cdd9d98454')
-            setPosts(res.data.articles)
-        }
-        fetchData()
-    },[])
-    return (
-        <>
-            <Header/>
-            <div className="home">
-                <Posts posts={posts}/>
-                <Sidebar/>
+  const [posts, setPosts] = useState([]);
+  const { search } = useLocation();
 
-            </div>
-        </>
-    )
+  console.log(search);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // due to using proxy in packet.json
+      const res = await axios.get("http://localhost:5000/api/posts" + search);
+      setPosts(res.data);
+    };
+    fetchData();
+  }, [search]);
+  return (
+    <>
+      <Header />
+      <div className="home">
+        <Posts posts={search ? posts : posts.slice(1)} />
+        <Sidebar />
+      </div>
+    </>
+  );
 }
 
-export default Home
+export default Home;
